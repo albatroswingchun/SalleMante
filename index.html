@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
     html, body {
+      margin: 0;
+      padding: 0;
       height: 100%;
-      width: 100%;
       overflow: hidden;
     }
 
@@ -26,10 +25,9 @@
       z-index: 1;
     }
 
-    /* === Zone de zoom circulaire === */
     .img-zoom-lens {
       position: absolute;
-      width: 140px;        /* ajusté au cercle intérieur */
+      width: 140px; /* correspond à la zone intérieure transparente */
       height: 140px;
       border-radius: 50%;
       overflow: hidden;
@@ -44,11 +42,10 @@
       background-size: 200% 200%;
     }
 
-    /* === Cadre PNG de la loupe === */
     .loupe-frame {
       position: absolute;
-      width: 180px;       /* taille totale de l'image PNG */
-      height: 180px;
+      width: 200px; /* taille réelle de l'image PNG */
+      height: 200px;
       pointer-events: none;
       z-index: 20;
       background-image: url('https://i.imgur.com/4ZyM16h.png');
@@ -75,10 +72,13 @@ function imageZoom(imgID) {
   const zoomArea = document.getElementById("zoomarea");
   const frame = document.getElementById("loupeframe");
 
+  const lensSize = 140;    // Diamètre du zoom utile
+  const frameSize = 200;   // Taille de l’image PNG
+  const offset = 30;       // Décalage visuel haut/gauche pour centrer le rond
+
   let cx, cy;
 
   function updateZoomSize() {
-    const lensRect = lens.getBoundingClientRect();
     cx = img.naturalWidth / img.offsetWidth;
     cy = img.naturalHeight / img.offsetHeight;
     zoomArea.style.backgroundImage = `url('${img.src}')`;
@@ -86,20 +86,15 @@ function imageZoom(imgID) {
   }
 
   function getCursorPos(e) {
-    const a = img.getBoundingClientRect();
-    const x = e.pageX - a.left - window.pageXOffset;
-    const y = e.pageY - a.top - window.pageYOffset;
+    const rect = img.getBoundingClientRect();
+    const x = e.pageX - rect.left - window.pageXOffset;
+    const y = e.pageY - rect.top - window.pageYOffset;
     return { x, y };
   }
 
   function moveLens(e) {
     e.preventDefault();
     const pos = getCursorPos(e);
-
-    const lensSize = 140;
-    const frameSize = 180;
-    const offset = (frameSize - lensSize) / 2;
-
     let x = pos.x - lensSize / 2;
     let y = pos.y - lensSize / 2;
 
