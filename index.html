@@ -27,7 +27,7 @@
 
     .img-zoom-lens {
       position: absolute;
-      width: 140px; /* correspond à la zone intérieure transparente */
+      width: 140px; /* diamètre du zoom visible */
       height: 140px;
       border-radius: 50%;
       overflow: hidden;
@@ -39,12 +39,12 @@
       width: 100%;
       height: 100%;
       background-repeat: no-repeat;
-      background-size: 500% 500%;
+      background-size: 100% 100%;
     }
 
     .loupe-frame {
       position: absolute;
-      width: 200px; /* taille réelle de l'image PNG */
+      width: 200px;
       height: 200px;
       pointer-events: none;
       z-index: 20;
@@ -72,9 +72,11 @@ function imageZoom(imgID) {
   const zoomArea = document.getElementById("zoomarea");
   const frame = document.getElementById("loupeframe");
 
-  const lensSize = 140;    // Diamètre du zoom utile
-  const frameSize = 200;   // Taille de l’image PNG
-  const offset = 30;       // Décalage visuel haut/gauche pour centrer le rond
+  const lensSize = 140;
+  const frameSize = 200;
+  const offset = 30;
+
+  const zoomFactor = 2; // <-- ici on agrandit le zoom (1.5, 2, 3...)
 
   let cx, cy;
 
@@ -82,7 +84,7 @@ function imageZoom(imgID) {
     cx = img.naturalWidth / img.offsetWidth;
     cy = img.naturalHeight / img.offsetHeight;
     zoomArea.style.backgroundImage = `url('${img.src}')`;
-    zoomArea.style.backgroundSize = `${img.offsetWidth * cx}px ${img.offsetHeight * cy}px`;
+    zoomArea.style.backgroundSize = `${img.offsetWidth * cx * zoomFactor}px ${img.offsetHeight * cy * zoomFactor}px`;
   }
 
   function getCursorPos(e) {
@@ -109,7 +111,7 @@ function imageZoom(imgID) {
     frame.style.left = (x - offset) + "px";
     frame.style.top = (y - offset) + "px";
 
-    zoomArea.style.backgroundPosition = `-${x * cx}px -${y * cy}px`;
+    zoomArea.style.backgroundPosition = `-${x * cx * zoomFactor}px -${y * cy * zoomFactor}px`;
   }
 
   function attachListeners() {
