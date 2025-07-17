@@ -1,87 +1,114 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
 
     .img-zoom-container {
       position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    #myimage {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
     }
 
     .img-zoom-lens {
       position: absolute;
-      border: 1px solid #d4d4d4;
-      width: 40px;
-      height: 40px;
+      border: 2px solid #d4d4d4;
+      width: 100px;
+      height: 100px;
       cursor: none;
     }
 
     .img-zoom-result {
-      border: 1px solid #d4d4d4;
+      position: absolute;
+      top: 10px;
+      right: 10px;
       width: 300px;
       height: 300px;
+      border: 2px solid #d4d4d4;
       background-repeat: no-repeat;
+      z-index: 10;
     }
   </style>
 </head>
 <body>
 
-<h1>Image Zoom</h1>
-<p>Mouse over the image:</p>
-
 <div class="img-zoom-container">
-  <img id="myimage" src="https://i.imgur.com/6g1SgDn.jpeg" width="300" height="240" alt="Zoomable Image">
+  <img id="myimage" src="https://i.imgur.com/6g1SgDn.jpeg" alt="Zoomable Image">
   <div id="myresult" class="img-zoom-result"></div>
 </div>
 
 <script>
 function imageZoom(imgID, resultID) {
-  var img = document.getElementById(imgID);
-  var result = document.getElementById(resultID);
-  var lens = document.createElement("DIV");
+  const img = document.getElementById(imgID);
+  const result = document.getElementById(resultID);
+  const lens = document.createElement("DIV");
   lens.setAttribute("class", "img-zoom-lens");
   img.parentElement.insertBefore(lens, img);
 
-  var cx = result.offsetWidth / lens.offsetWidth;
-  var cy = result.offsetHeight / lens.offsetHeight;
+  let cx, cy;
 
-  result.style.backgroundImage = "url('" + img.src + "')";
-  result.style.backgroundSize = (img.width * cx) + "px " + (img.height * cy) + "px";
-
-  lens.addEventListener("mousemove", moveLens);
-  img.addEventListener("mousemove", moveLens);
-  lens.addEventListener("touchmove", moveLens);
-  img.addEventListener("touchmove", moveLens);
-
-  function moveLens(e) {
-    e.preventDefault();
-    var pos = getCursorPos(e);
-    var x = pos.x - (lens.offsetWidth / 2);
-    var y = pos.y - (lens.offsetHeight / 2);
-
-    if (x > img.width - lens.offsetWidth) x = img.width - lens.offsetWidth;
-    if (x < 0) x = 0;
-    if (y > img.height - lens.offsetHeight) y = img.height - lens.offsetHeight;
-    if (y < 0) y = 0;
-
-    lens.style.left = x + "px";
-    lens.style.top = y + "px";
-
-    result.style.backgroundPosition = "-" + (x * cx) + "px -" + (y * cy) + "px";
+  function updateZoom() {
+    cx = result.offsetWidth / lens.offsetWidth;
+    cy = result.offsetHeight / lens.offsetHeight;
+    result.style.backgroundImage = "url('" + img.src + "')";
+    result.style.backgroundSize = (img.width * cx) + "px " + (img.height * cy) + "px";
   }
 
   function getCursorPos(e) {
     e = e || window.event;
-    var a = img.getBoundingClientRect();
-    var x = e.pageX - a.left - window.pageXOffset;
-    var y = e.pageY - a.top - window.pageYOffset;
-    return { x: x, y: y };
+    const rect = img.getBoundingClientRect();
+    const x = e.pageX - rect.left - window.pageXOffset;
+    const y = e.pageY - rect.top - window.pageYOffset;
+    return { x, y };
   }
+
+  function moveLens(e) {
+    e.preventDefault();
+    const pos = getCursorPos(e);
+    let x = pos.x - lens.offsetWidth / 2;
+    let y = pos.y - lens.offsetHeight / 2;
+
+    const boundsX = img.width - lens.offsetWidth;
+    const boundsY = img.height - lens.offsetHeight;
+
+    x = Math.max(0, Math.min(x, boundsX));
+    y = Math.max(0, Math.min(y, boundsY));
+
+    lens.style.left = x + "px";
+    lens.style.top = y + "px";
+    result.style.backgroundPosition = `-${x * cx}px -${y * cy}px`;
+  }
+
+  function attachListeners() {
+    ["mousemove", "touchmove"].forEach(event => {
+      lens.addEventListener(event, moveLens);
+      img.addEventListener(event, moveLens);
+    });
+  }
+
+  window.addEventListener("resize", () => {
+    setTimeout(updateZoom, 100);
+  });
+
+  updateZoom();
+  attachListeners();
 }
 
-// Lancer le zoom après chargement
-window.onload = function() {
+window.onload = () => {
   imageZoom("myimage", "myresult");
 };
 </script>
