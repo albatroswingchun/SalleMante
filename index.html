@@ -97,8 +97,8 @@ function imageZoom() {
     const dx = pos.x - centerX;
     const dy = pos.y - centerY;
 
-    const offsetX = 20;   // Décalage horizontal du rendu
-    const offsetY = -10;  // Décalage vertical du rendu
+    const offsetX = 50;   // Décalage horizontal du rendu
+    const offsetY = 30;  // Décalage vertical du rendu
 
     zoomed.style.transform = `scale(${zoomFactor})`;
     zoomed.style.left = (-(centerX + dx * motionFactor - lensSize / 2) * zoomFactor + offsetX) + "px";
