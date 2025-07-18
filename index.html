@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Loupe Zoom x0.85</title>
+  <title>Loupe Zoom x0.85 avec décalage</title>
   <style>
     html, body {
       margin: 0;
@@ -97,9 +97,12 @@ function imageZoom() {
     const dx = pos.x - centerX;
     const dy = pos.y - centerY;
 
+    const offsetX = 20;   // Décalage horizontal du rendu
+    const offsetY = -10;  // Décalage vertical du rendu
+
     zoomed.style.transform = `scale(${zoomFactor})`;
-    zoomed.style.left = -(centerX + dx * motionFactor - lensSize / 2) * zoomFactor + "px";
-    zoomed.style.top  = -(centerY + dy * motionFactor - lensSize / 2) * zoomFactor + "px";
+    zoomed.style.left = (-(centerX + dx * motionFactor - lensSize / 2) * zoomFactor + offsetX) + "px";
+    zoomed.style.top  = (-(centerY + dy * motionFactor - lensSize / 2) * zoomFactor + offsetY) + "px";
 
     frame.style.left = (lensX + frameOffsetX) + "px";
     frame.style.top  = (lensY + frameOffsetY) + "px";
