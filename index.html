@@ -76,6 +76,9 @@ function imageZoom() {
   const frameOffsetX = 35;
   const frameOffsetY = 55;
 
+  const offsetX = 17;           // Décalage horizontal du rendu zoomé
+  const offsetY = 73;           // Décalage vertical du rendu zoomé
+
   function getCursorPos(e) {
     const rect = img.getBoundingClientRect();
     const x = e.clientX - rect.left;
