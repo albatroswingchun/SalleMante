@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loupe Zoom x0.85</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
       overflow: hidden;
+      cursor: none;
     }
-
     .img-zoom-container {
       position: relative;
       width: 100vw;
       height: 100vh;
     }
-
     #myimage {
       position: absolute;
       width: 100%;
@@ -24,28 +24,26 @@
       object-fit: cover;
       z-index: 1;
     }
-
     .img-zoom-lens {
       position: absolute;
-      width: 170px; /* diamètre du zoom visible */
-      height: 170px;
+      width: 150px;
+      height: 150px;
       border-radius: 50%;
       overflow: hidden;
       pointer-events: none;
       z-index: 10;
+      border: 2px solid white;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
     }
-
-    .zoom-area {
-      width: 100%;
-      height: 100%;
-      background-repeat: no-repeat;
-      background-size: 100% 100%;
+    .zoomed-image {
+      position: absolute;
+      transform-origin: top left;
+      pointer-events: none;
     }
-
     .loupe-frame {
       position: absolute;
-      width: 200px;
-      height: 200px;
+      width: 300px;
+      height: 300px;
       pointer-events: none;
       z-index: 20;
       background-image: url('https://i.imgur.com/4ZyM16h.png');
@@ -60,77 +58,64 @@
 <div class="img-zoom-container">
   <img id="myimage" src="https://i.imgur.com/nZ8nfXg.png" alt="Image Zoom">
   <div id="lens" class="img-zoom-lens">
-    <div class="zoom-area" id="zoomarea"></div>
+    <img id="zoomed" class="zoomed-image" src="https://i.imgur.com/nZ8nfXg.png" alt="zoom">
   </div>
   <div id="loupeframe" class="loupe-frame"></div>
 </div>
 
 <script>
-function imageZoom(imgID) {
-  const img = document.getElementById(imgID);
+function imageZoom() {
+  const img = document.getElementById("myimage");
   const lens = document.getElementById("lens");
-  const zoomArea = document.getElementById("zoomarea");
+  const zoomed = document.getElementById("zoomed");
   const frame = document.getElementById("loupeframe");
 
-  const lensSize = 140;
-  const frameSize = 200;
-  const offset = 0;
-
-  const zoomFactor = 2; // <-- ici on agrandit le zoom (1.5, 2, 3...)
-
-  let cx, cy;
-
-  function updateZoomSize() {
-    cx = img.naturalWidth / img.offsetWidth;
-    cy = img.naturalHeight / img.offsetHeight;
-    zoomArea.style.backgroundImage = `url('${img.src}')`;
-    zoomArea.style.backgroundSize = `${img.offsetWidth * cx * zoomFactor}px ${img.offsetHeight * cy * zoomFactor}px`;
-  }
+  const lensSize = 150;
+  const zoomFactor = 2;
+  const motionFactor = 0.85;
+  const frameOffsetX = 35;
+  const frameOffsetY = 55;
 
   function getCursorPos(e) {
     const rect = img.getBoundingClientRect();
-    const x = e.pageX - rect.left - window.pageXOffset;
-    const y = e.pageY - rect.top - window.pageYOffset;
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
     return { x, y };
   }
 
   function moveLens(e) {
     e.preventDefault();
     const pos = getCursorPos(e);
-    let x = pos.x - lensSize / 2;
-    let y = pos.y - lensSize / 2;
 
-    const maxX = img.offsetWidth - lensSize;
-    const maxY = img.offsetHeight - lensSize;
+    const lensX = pos.x - lensSize / 2;
+    const lensY = pos.y - lensSize / 2;
+    lens.style.left = lensX + "px";
+    lens.style.top = lensY + "px";
 
-    x = Math.max(0, Math.min(x, maxX));
-    y = Math.max(0, Math.min(y, maxY));
+    const centerX = img.offsetWidth / 2;
+    const centerY = img.offsetHeight / 2;
+    const dx = pos.x - centerX;
+    const dy = pos.y - centerY;
 
-    lens.style.left = x + "px";
-    lens.style.top = y + "px";
-    frame.style.left = (x - offset) + "px";
-    frame.style.top = (y - offset) + "px";
+    zoomed.style.transform = `scale(${zoomFactor})`;
+    zoomed.style.left = -(centerX + dx * motionFactor - lensSize / 2) * zoomFactor + "px";
+    zoomed.style.top  = -(centerY + dy * motionFactor - lensSize / 2) * zoomFactor + "px";
 
-    zoomArea.style.backgroundPosition = `-${x * cx * zoomFactor}px -${y * cy * zoomFactor}px`;
+    frame.style.left = (lensX + frameOffsetX) + "px";
+    frame.style.top  = (lensY + frameOffsetY) + "px";
   }
 
   function attachListeners() {
     ["mousemove", "touchmove"].forEach(event => {
       img.addEventListener(event, moveLens);
+      lens.addEventListener(event, moveLens);
     });
   }
 
-  window.addEventListener("resize", () => {
-    setTimeout(updateZoomSize, 100);
-  });
-
-  updateZoomSize();
   attachListeners();
 }
 
-window.onload = () => {
-  imageZoom("myimage");
-};
+window.onload = imageZoom;
 </script>
 
 </body>
